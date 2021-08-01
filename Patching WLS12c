@@ -1,0 +1,30 @@
+#!/bin/bash
+#Define Varibles here OPHOME(OPatch home dir path),PPATH(mention the path of dir which contains 12c patches)
+OPHOME=/u01/app/oracle/WLS/wls12c/OPatch
+PPATH=/u01/app/oracle/patchIDs12c
+if [ $ACTION = apply ]
+  then
+    for i in $PATCH
+      do
+        pid=`$OPHOME/opatch lsinventory|grep $i|sed -n 1p`
+        if ! [ -z "$pid" ]
+          then
+            echo "Selected Patch was already applied"
+            echo "$pid"
+          else
+            $OPHOME/opatch $ACTION -silent $PPATH/$i
+            echo "Applied patch $i Successfully"
+        fi
+      done
+  else
+    for i in $PATCH
+      do
+        pid=`$OPHOME/opatch lsinventory|grep $i|sed -n 1p`
+          if [ -z "$pid" ]
+            then
+              echo "The Selected Patch was not applied"
+            else
+              $OPHOME/OPatch/opatch $ACTION -silent -id $i
+          fi
+      done
+fi
