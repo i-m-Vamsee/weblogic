@@ -1,0 +1,26 @@
+#!/bin/bash
+#Define variable values here as per your environment
+#URLLIST_FILE(Mention the file that contains the server list)
+#RESPONSE_CODE_FILE(Mention the file that the output should be save under)
+URLLIST_FILE=urllist.txt
+RESPONSE_CODE_FILE=urlcheck.out
+if [ -f $RESPONSE_CODE_FILE ]
+  then
+    rm -f $RESPONSE_CODE_FILE
+fi
+echo -e "SERVER_URL CODE HEALTH" > $RESPONSE_CODE_FILE
+while read url
+  do
+    {
+      code=`wget --spider "$url" 2>&1|grep HTTP|tail -1|awk {'print$6'}`
+        if [ $code -eq 200 ]
+          then
+            hs="OK"
+          else
+            hs="Not_OK"
+        fi
+      echo "$url $code $hs" >> $RESPONSE_CODE_FILE
+    }
+  done < $URLLIST_FILE
+echo "`cat $RESPONSE_CODE_FILE | awk '{printf("%-30s%-10s%-10s\n",$1,$2,$3)}'`" > $RESPONSE_CODE_FILE
+mailx -s "Update on Servers response code" oracle@docker.oracleworld.com < $RESPONSE_CODE_FILE
