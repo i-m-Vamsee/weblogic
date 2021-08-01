@@ -1,0 +1,61 @@
+#!/bin/bash
+#define DomainHome, AdminServer & IFS varibles here
+IFS=,
+DHome="/u01/app/oracle/wlsclass/user_projects/domains/wlsdom"
+AdminServer="AdminServer"
+func_start()
+{
+  if [ $i = "$AdminServer" ]
+    then
+      BUILD_ID=dontKillMe sh $DHome/bin/startWebLogic.sh >/dev/null 2>&1 &
+      echo "STARTED $i SUCCESSFULLY"
+    else
+      BUILD_ID=dontKillMe sh $DHome/bin/startManagedWebLogic.sh $i t3://localhost:7001 >/dev/null 2>&1 &
+      echo "STARTED $i SERVER SUCCESSFULLY"
+  fi
+}
+func_stop()
+{
+  if [ $i = "$AdminServer" ]
+    then
+      BUILD_ID=dontKillMe sh $DHome/bin/stopWebLogic.sh
+      echo "$i SUCCESSFULLY CHANGED TO SHUTDOWN STATE"
+    else
+      BUILD_ID=dontKillMe sh $DHome/bin/stopManagedWebLogic.sh $i t3://localhost:7001
+      echo "$i SUCCESSFULLY CHANGED TO SHUTDOWN STATE"
+  fi
+}
+if [ $Start_Stop = true ]
+  then
+    for i in $Servers
+      do
+        if [ -f $DHome/servers/"$i"/tmp/"$i".lok ]
+          then
+            id=`fuser $DHome/servers/"$i"/tmp/"$i".lok 2>&1 |awk {'print$2'}`
+              if ! [ -z $id ]
+                then
+                  echo "$i IS ALREADY IN RUNNING STATE (PID : $id)"
+                else
+                  func_start
+              fi
+          else
+            func_start
+        fi
+      done
+  else
+    for i in $Servers
+      do
+        if [ -f $DHome/servers/"$i"/tmp/"$i".lok ]
+          then
+            id=`fuser $DHome/servers/"$i"/tmp/"$i".lok 2>&1 |awk {'print$2'}`
+              if ! [ -z $id ]
+                then
+                  func_stop
+                else
+                  echo "$i SERVER IS NOT RUNNING"
+              fi
+          else
+            echo "$i SERVER IS NOT RUNNING"
+        fi
+      done
+fi
