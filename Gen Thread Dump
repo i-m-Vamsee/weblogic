@@ -1,0 +1,35 @@
+#!/bin/bash
+#Define variables here as per your environment
+DHOME=/u01/app/oracle/wlsclass/user_projects/domains/wlsdom
+JHOME=/u01/app/oracle/JAVA/jdk1.8.0_191
+THREADDIR=/u01/app/oracle/threads
+echo -n "Enter Server name : "
+read ser
+echo -n "Enter number of Logs : "
+read n
+if [ -d $DHOME/servers/$ser ]
+  then
+    if [ -f $DHOME/servers/"$ser"/tmp/"$ser".lok ]
+      then
+        id=`fuser $DHOME/servers/"$ser"/tmp/"$ser".lok 2>&1 |awk {'print$2'}`
+          if ! [ -z $id ]
+            then
+              if ! [ -d $THREADDIR/"$ser"_threads ]
+                then
+                  mkdir $THREADDIR/"$ser"_threads
+              fi
+              count=1
+              while [ $count -le $n ]
+                do
+                  $JHOME/bin/jstack -l $id > $THREADDIR/"$ser"_threads/thread_dump$count.log
+                  count=`expr $count + 1`
+                done
+            else
+              echo "Server is not Running"
+          fi
+      else
+        echo "Server is not Running"
+    fi
+  else
+    echo "Incorrect Server Name"
+fi
