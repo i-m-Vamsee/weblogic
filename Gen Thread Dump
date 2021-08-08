@@ -23,6 +23,7 @@ if [ -d $DHOME/servers/$ser ]
                 do
                   $JHOME/bin/jstack -l $id > $THREADDIR/"$ser"_threads/thread_dump$count.log
                   count=`expr $count + 1`
+                  sleep 5
                 done
             else
               echo "Server is not Running"
