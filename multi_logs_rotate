@@ -1,0 +1,13 @@
+#!/bin/bash
+#This helps to find log files sizd more than define size and delete top lines until it reaches to defined size
+f=`find . -type f -name "*.log" -size +20M`
+mx=20
+for i in $f
+do
+s=`du -m $i|awk {'print$1'}`
+while [ $s -gt $mx ]
+do
+sed -i 1,8870d $i
+s=`du -m $i|awk {'print$1'}`
+done
+done
