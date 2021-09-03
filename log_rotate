@@ -1,0 +1,9 @@
+#!/bin/bash
+#this script helps to rotate log for specific file by deleting 1 mb of top lines, run this on crontab
+mx=20
+s=`du -m bigfile.log|awk {'print$1'}`
+while [ $s -gt $mx]
+do
+sed -i 1,8880d bigfile.log
+s=`du -m bigfile.log|awk {'print$1'}`
+done
